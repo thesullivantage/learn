@@ -19,7 +19,8 @@
     "sass-loader": "6.0.6",
     "webpack": "3.5.6",
     "webpack-cleanup-plugin": "0.5.1",
-    "webpack-dashboard": "1.0.0-5"
+    "webpack-dashboard": "1.0.0-5",
+    "zangodb": "1.0.6"
   },
   "description": "Experimental learning exercises for my kids",
   "devDependencies": {

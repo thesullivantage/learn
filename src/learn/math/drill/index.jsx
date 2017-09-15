@@ -8,57 +8,60 @@ const Running = require('./running');
 
 class MathDrill extends React.Component {
   static save(keyValuePair) {
-    const options = db.getOptions();
-    if (!options || !keyValuePair || !keyValuePair.hasOwnProperty) {
-      return;
-    }
-
-    Object.keys(options).forEach((key) => {
-      if (Object.prototype.hasOwnProperty.call(keyValuePair, key)) {
-        options[key] = keyValuePair[key];
+    db.getOptions((err, opts) => {
+      const options = opts;
+      if (!options || !keyValuePair || !keyValuePair.hasOwnProperty) {
+        return;
       }
-    });
 
-    db.saveOptions(options);
+      Object.keys(options).forEach((key) => {
+        if (Object.prototype.hasOwnProperty.call(keyValuePair, key)) {
+          options[key] = keyValuePair[key];
+        }
+      });
+
+      db.saveOptions(options);
+    });
   }
 
   constructor() {
     super();
 
-    let options = db.getOptions();
-    if (options) {
-      if (typeof options.userName !== 'string') {
-        options.userName = '';
+    db.getOptions((err, opts) => {
+      let options = opts;
+      if (options) {
+        if (typeof options.userName !== 'string') {
+          options.userName = '';
+          db.saveOptions(options);
+        }
+        if (options.opIndex) {
+          options.opIndexes = [options.opIndex];
+          delete options.opIndex;
+          db.saveOptions(options);
+        }
+      } else {
+        options = {
+          levelIndex: 0, // A
+          minutes: '1',
+          onscreenKeyboard: true,
+          opIndexes: [0], // +
+          totalProblems: '20',
+          userName: '',
+        };
         db.saveOptions(options);
       }
-      if (options.opIndex) {
-        options.opIndexes = [options.opIndex];
-        delete options.opIndex;
-        db.saveOptions(options);
-      }
-    } else {
-      options = {
-        levelIndex: 0, // A
-        minutes: '1',
-        onscreenKeyboard: true,
-        opIndexes: [0], // +
-        totalProblems: '20',
-        userName: '',
+
+      this.state = {
+        currentTask: [],
+        levelIndex: options.levelIndex,
+        minutes: options.minutes,
+        onscreenKeyboard: options.onscreenKeyboard,
+        opIndexes: options.opIndexes,
+        previousResults: [], // previousResults results of quiz
+        totalProblems: options.totalProblems,
+        userName: options.userName,
       };
-      db.saveOptions(options);
-    }
-
-    this.state = {
-      currentTask: [],
-      levelIndex: options.levelIndex,
-      minutes: options.minutes,
-      onscreenKeyboard: options.onscreenKeyboard,
-      opIndexes: options.opIndexes,
-      previousResults: [], // previousResults results of quiz
-      totalProblems: options.totalProblems,
-      userName: options.userName,
-    };
-
+    });
     this.checkAnswer = this.checkAnswer.bind(this);
     this.onChange = this.onChange.bind(this);
     this.onStart = this.onStart.bind(this);
