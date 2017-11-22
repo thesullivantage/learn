@@ -4,12 +4,15 @@ const loaders = require('./webpack.loaders');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WebpackCleanupPlugin = require('webpack-cleanup-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const WorkboxPlugin = require('workbox-webpack-plugin');
 
 loaders.push({
   test: /\.scss$/,
   loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader?sourceMap&localIdentName=[local]___[hash:base64:5]!sass-loader?outputStyle=expanded' }),
   exclude: ['node_modules'],
 });
+
+const outputPath = path.join(__dirname, 'public');
 
 module.exports = {
   entry: [
@@ -18,7 +21,7 @@ module.exports = {
   ],
   output: {
     publicPath: '/',
-    path: path.join(__dirname, 'public'),
+    path: outputPath,
     filename: '[chunkhash].js',
   },
   resolve: {
@@ -53,6 +56,13 @@ module.exports = {
         css: ['style.css'],
         js: ['bundle.js'],
       },
+    }),
+    new WorkboxPlugin({
+      globDirectory: outputPath,
+      globPatterns: ['**/*.{html,js}'],
+      swDest: path.join(outputPath, 'sw.js'),
+      clientsClaim: true,
+      skipWaiting: true,
     }),
   ],
 };

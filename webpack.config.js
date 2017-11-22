@@ -6,6 +6,7 @@ const loaders = require('./webpack.loaders');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const DashboardPlugin = require('webpack-dashboard/plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const WorkboxPlugin = require('workbox-webpack-plugin');
 
 const HOST = process.env.HOST || '127.0.0.1';
 const PORT = process.env.PORT || '8888';
@@ -16,6 +17,8 @@ loaders.push({
   exclude: ['node_modules'],
 });
 
+const outputPath = path.join(__dirname, 'public');
+
 module.exports = {
   entry: [
     'react-hot-loader/patch',
@@ -24,7 +27,7 @@ module.exports = {
   devtool: process.env.WEBPACK_DEVTOOL || 'eval-source-map',
   output: {
     publicPath: '/',
-    path: path.join(__dirname, 'public'),
+    path: outputPath,
     filename: 'bundle.js',
   },
   resolve: {
@@ -61,6 +64,13 @@ module.exports = {
         css: ['style.css'],
         js: ['bundle.js'],
       },
+    }),
+    new WorkboxPlugin({
+      globDirectory: outputPath,
+      globPatterns: ['**/*.{html,js}'],
+      swDest: path.join(outputPath, 'sw.js'),
+      clientsClaim: true,
+      skipWaiting: true,
     }),
   ],
 };

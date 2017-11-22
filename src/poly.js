@@ -28,9 +28,27 @@ function loadScript(features, done) {
 }
 
 module.exports = (featureList = defaultFeatures, done) => {
+  function registerServiceWorker(err) {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then((registration) => {
+          // eslint-disable-next-line no-console
+          console.log('SW registered: ', registration);
+          done(err);
+        }).catch((registrationError) => {
+          // eslint-disable-next-line no-console
+          console.error('SW registration failed: ', registrationError);
+          done(err);
+        });
+      });
+    } else {
+      done(err);
+    }
+  }
+
   if (browserSupportsAllFeatures(featureList)) {
-    done();
+    registerServiceWorker();
   } else {
-    loadScript(featureList, done);
+    loadScript(featureList, registerServiceWorker);
   }
 };
